@@ -1,6 +1,6 @@
-name: 'FeaturesFlow Cleanup'
-description: 'A GitHub Action to automatically remove specified feature flags in the codebase.'
-author: 'Your Name'
+name: 'Automatic flag clean up for FeaturesFlow '
+description: 'A GitHub Action to automatically remove stale feature flags in the codebase.'
+author: 'Jakub Baginski'
 icon: 'terminal'
 color: 'gray-dark'
 
