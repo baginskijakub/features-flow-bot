@@ -1,0 +1,21 @@
+# action.yml
+
+name: 'FeaturesFlow Cleanup'
+description: 'A GitHub Action to automatically remove specified feature flags in the codebase.'
+author: 'Your Name'
+inputs:
+  directory:
+    description: 'Directory to search for files'
+    required: true
+    default: './src'
+  auth_key:
+    description: 'Authentication Key'
+    required: true
+    secret: true
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+
+permissions:
+  contents: write
