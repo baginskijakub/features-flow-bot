@@ -1,6 +1,8 @@
 name: 'FeaturesFlow Cleanup'
 description: 'A GitHub Action to automatically remove specified feature flags in the codebase.'
 author: 'Your Name'
+icon: 'terminal'
+color: 'gray-dark'
 
 inputs:
   directory:
