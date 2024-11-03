@@ -12,6 +12,10 @@ inputs:
     description: 'Authentication Key'
     required: true
     secret: true
+  base_branch:
+    description: 'Base branch to compare against'
+    required: false
+    default: 'main'
 
 runs:
   using: 'node16'

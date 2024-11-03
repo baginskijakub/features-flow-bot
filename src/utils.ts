@@ -1,6 +1,8 @@
 import { TFile, TResponse } from './types'
 import fs from 'fs/promises'
 import path from 'path'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
 
 export async function findFilesWithFlags(directory: string, flags: string[]): Promise<TFile[]> {
   const filesToModify: TFile[] = [];
@@ -73,5 +75,28 @@ export async function applyChanges(response: TResponse): Promise<void> {
     } catch (error) {
       console.error(`Error deleting file ${filePath}:`, error);
     }
+  }
+}
+
+export async function createPullRequest(branchName: string) {
+  const token = core.getInput('GITHUB_TOKEN', { required: true });
+  const baseBranch = core.getInput('base_branch', { required: false }) || 'main';
+  const octokit = github.getOctokit(token);
+  const { owner, repo } = github.context.repo;
+
+  try {
+    const { data: pullRequest } = await octokit.rest.pulls.create({
+      owner,
+      repo,
+      head: branchName,
+      base: baseBranch,
+      title: 'Remove Stale Feature Flags',
+      body: 'This PR removes stale feature flags and associated code. This is an automated PR created by the FeaturesFlow.',
+    });
+
+    console.log(`Pull request created: ${pullRequest.html_url}`);
+  } catch (error) {
+    console.error('Failed to create pull request:', error);
+    throw error;
   }
 }
