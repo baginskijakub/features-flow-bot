@@ -1,8 +1,7 @@
-# action.yml
-
 name: 'FeaturesFlow Cleanup'
 description: 'A GitHub Action to automatically remove specified feature flags in the codebase.'
 author: 'Your Name'
+
 inputs:
   directory:
     description: 'Directory to search for files'
@@ -19,7 +18,22 @@ inputs:
 
 runs:
   using: 'node16'
-  main: 'dist/index.js'
+  steps:
+    - name: 'Checkout repository'
+      uses: actions/checkout@v3
+
+    - name: 'Setup Node.js'
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: 'Install dependencies'
+      run: npm install
+
+    - name: 'Run TypeScript Action'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npx ts-node src/index.ts
 
 permissions:
   contents: write

@@ -6,6 +6,7 @@ export const getStaleFlags = async (authKey: string): Promise<string[]> => {
   const res = await fetch(
     `${API_URL}/bot/stale`,
     {
+      method: 'POST',
       body: JSON.stringify({authKey})
     })
 
@@ -22,6 +23,7 @@ export const removeFlagsFromFiles = async (files: TFile[], flags: string[]): Pro
   const res = await fetch(
     `${API_URL}/bot/remove`,
     {
+      method: 'POST',
       body: JSON.stringify({files, flags})
     })
 
