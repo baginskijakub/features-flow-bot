@@ -2,12 +2,12 @@ import { TFile, TResponse } from './types'
 
 const API_URL = 'https://sdk.featuresflow.com/v1/'
 
-export const getStaleFlags = async (authKey: string): Promise<string[]> => {
+export const getStaleFlags = async (authenticationKey: string): Promise<string[]> => {
   const res = await fetch(
     `${API_URL}/bot/stale`,
     {
       method: 'POST',
-      body: JSON.stringify({authKey})
+      body: JSON.stringify({authenticationKey})
     })
 
 
@@ -19,12 +19,12 @@ export const getStaleFlags = async (authKey: string): Promise<string[]> => {
 }
 
 
-export const removeFlagsFromFiles = async (files: TFile[], flags: string[]): Promise<TResponse> => {
+export const removeFlagsFromFiles = async (files: TFile[], flags: string[], authenticationKey: string): Promise<TResponse> => {
   const res = await fetch(
     `${API_URL}/bot/remove`,
     {
       method: 'POST',
-      body: JSON.stringify({files, flags})
+      body: JSON.stringify({files, flags, authenticationKey})
     })
 
   if(!res.ok) {
