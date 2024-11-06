@@ -27586,76 +27586,6 @@ function findImpactedFiles(filesToModify) {
         });
     });
 }
-function applyChanges(response) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, modifiedFiles, filesToDelete, results, _i, modifiedFiles_1, file, error_6, _b, filesToDelete_1, filePath, error_7;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    if (response.status === 'error') {
-                        coreExports.setFailed(response.message);
-                        return [2 /*return*/];
-                    }
-                    _a = response.data, modifiedFiles = _a.modifiedFiles, filesToDelete = _a.filesToDelete;
-                    results = {
-                        success: { modified: 0, deleted: 0 },
-                        failed: { modified: 0, deleted: 0 }
-                    };
-                    _i = 0, modifiedFiles_1 = modifiedFiles;
-                    _c.label = 1;
-                case 1:
-                    if (!(_i < modifiedFiles_1.length)) return [3 /*break*/, 6];
-                    file = modifiedFiles_1[_i];
-                    _c.label = 2;
-                case 2:
-                    _c.trys.push([2, 4, , 5]);
-                    return [4 /*yield*/, fs.writeFile(file.path, file.content, 'utf8')];
-                case 3:
-                    _c.sent();
-                    coreExports.info("Updated file: ".concat(file.path));
-                    results.success.modified++;
-                    return [3 /*break*/, 5];
-                case 4:
-                    error_6 = _c.sent();
-                    coreExports.error("Error writing to file ".concat(file.path, ": ").concat(error_6));
-                    results.failed.modified++;
-                    return [3 /*break*/, 5];
-                case 5:
-                    _i++;
-                    return [3 /*break*/, 1];
-                case 6:
-                    _b = 0, filesToDelete_1 = filesToDelete;
-                    _c.label = 7;
-                case 7:
-                    if (!(_b < filesToDelete_1.length)) return [3 /*break*/, 12];
-                    filePath = filesToDelete_1[_b];
-                    _c.label = 8;
-                case 8:
-                    _c.trys.push([8, 10, , 11]);
-                    return [4 /*yield*/, fs.unlink(filePath)];
-                case 9:
-                    _c.sent();
-                    coreExports.info("Deleted file: ".concat(filePath));
-                    results.success.deleted++;
-                    return [3 /*break*/, 11];
-                case 10:
-                    error_7 = _c.sent();
-                    coreExports.error("Error deleting file ".concat(filePath, ": ").concat(error_7));
-                    results.failed.deleted++;
-                    return [3 /*break*/, 11];
-                case 11:
-                    _b++;
-                    return [3 /*break*/, 7];
-                case 12:
-                    // Set output for GitHub Actions
-                    coreExports.setOutput('modified_files', results.success.modified);
-                    coreExports.setOutput('deleted_files', results.success.deleted);
-                    coreExports.setOutput('failed_operations', results.failed.modified + results.failed.deleted);
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
 
 var github = {};
 
@@ -112803,8 +112733,215 @@ function requireGithub () {
 
 var githubExports = requireGithub();
 
-requireExec();
+var execExports = requireExec();
 
+function configureGit() {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 3, , 4]);
+                    return [4 /*yield*/, execExports.exec('git', [
+                            'config',
+                            'user.name',
+                            'github-actions[bot]'
+                        ])];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, execExports.exec('git', [
+                            'config',
+                            'user.email',
+                            'github-actions[bot]@users.noreply.github.com'
+                        ])];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _a.sent();
+                    coreExports.error("Failed to configure git user: ".concat(error_1));
+                    throw error_1;
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}
+function commitChanges(message) {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 4, , 5]);
+                    // Configure git user first
+                    return [4 /*yield*/, configureGit()];
+                case 1:
+                    // Configure git user first
+                    _a.sent();
+                    // Stage all changes
+                    return [4 /*yield*/, execExports.exec('git', ['add', '.'])];
+                case 2:
+                    // Stage all changes
+                    _a.sent();
+                    // Create commit
+                    return [4 /*yield*/, execExports.exec('git', ['commit', '-m', message])];
+                case 3:
+                    // Create commit
+                    _a.sent();
+                    coreExports.debug('Changes committed successfully');
+                    return [3 /*break*/, 5];
+                case 4:
+                    error_2 = _a.sent();
+                    coreExports.error("Failed to commit changes: ".concat(error_2));
+                    throw error_2;
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
+function createBranch(branchName) {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    // Create and checkout new branch
+                    return [4 /*yield*/, execExports.exec('git', ['checkout', '-b', branchName])];
+                case 1:
+                    // Create and checkout new branch
+                    _a.sent();
+                    coreExports.debug("Created and checked out branch: ".concat(branchName));
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_3 = _a.sent();
+                    coreExports.error('Failed to create branch');
+                    throw error_3;
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+function pushChanges(branchName) {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_4;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, execExports.exec('git', ['push', 'origin', branchName])];
+                case 1:
+                    _a.sent();
+                    coreExports.debug("Pushed changes to branch: ".concat(branchName));
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_4 = _a.sent();
+                    coreExports.error('Failed to push changes');
+                    throw error_4;
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+function applyChanges(response) {
+    return __awaiter(this, void 0, void 0, function () {
+        var _a, modifiedFiles, filesToDelete, results, timestamp, branchName, _i, modifiedFiles_1, file, error_5, _b, filesToDelete_1, filePath, error_6, error_7;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    if (response.status === 'error') {
+                        coreExports.setFailed(response.message);
+                        return [2 /*return*/];
+                    }
+                    _a = response.data, modifiedFiles = _a.modifiedFiles, filesToDelete = _a.filesToDelete;
+                    results = {
+                        success: { modified: 0, deleted: 0 },
+                        failed: { modified: 0, deleted: 0 }
+                    };
+                    timestamp = new Date().getTime();
+                    branchName = "feature-flag-cleanup-".concat(timestamp);
+                    _c.label = 1;
+                case 1:
+                    _c.trys.push([1, 18, , 19]);
+                    // Create new branch
+                    return [4 /*yield*/, createBranch(branchName)];
+                case 2:
+                    // Create new branch
+                    _c.sent();
+                    _i = 0, modifiedFiles_1 = modifiedFiles;
+                    _c.label = 3;
+                case 3:
+                    if (!(_i < modifiedFiles_1.length)) return [3 /*break*/, 8];
+                    file = modifiedFiles_1[_i];
+                    _c.label = 4;
+                case 4:
+                    _c.trys.push([4, 6, , 7]);
+                    return [4 /*yield*/, fs.writeFile(file.path, file.content, 'utf8')];
+                case 5:
+                    _c.sent();
+                    coreExports.info("Updated file: ".concat(file.path));
+                    results.success.modified++;
+                    return [3 /*break*/, 7];
+                case 6:
+                    error_5 = _c.sent();
+                    coreExports.error("Error writing to file ".concat(file.path, ": ").concat(error_5));
+                    results.failed.modified++;
+                    return [3 /*break*/, 7];
+                case 7:
+                    _i++;
+                    return [3 /*break*/, 3];
+                case 8:
+                    _b = 0, filesToDelete_1 = filesToDelete;
+                    _c.label = 9;
+                case 9:
+                    if (!(_b < filesToDelete_1.length)) return [3 /*break*/, 14];
+                    filePath = filesToDelete_1[_b];
+                    _c.label = 10;
+                case 10:
+                    _c.trys.push([10, 12, , 13]);
+                    return [4 /*yield*/, fs.unlink(filePath)];
+                case 11:
+                    _c.sent();
+                    coreExports.info("Deleted file: ".concat(filePath));
+                    results.success.deleted++;
+                    return [3 /*break*/, 13];
+                case 12:
+                    error_6 = _c.sent();
+                    coreExports.error("Error deleting file ".concat(filePath, ": ").concat(error_6));
+                    results.failed.deleted++;
+                    return [3 /*break*/, 13];
+                case 13:
+                    _b++;
+                    return [3 /*break*/, 9];
+                case 14: 
+                // Commit and push changes
+                return [4 /*yield*/, commitChanges('Remove stale feature flags')];
+                case 15:
+                    // Commit and push changes
+                    _c.sent();
+                    return [4 /*yield*/, pushChanges(branchName)];
+                case 16:
+                    _c.sent();
+                    // Create pull request
+                    return [4 /*yield*/, createPullRequest(branchName)];
+                case 17:
+                    // Create pull request
+                    _c.sent();
+                    // Set outputs
+                    coreExports.setOutput('branch_name', branchName);
+                    coreExports.setOutput('modified_files', results.success.modified);
+                    coreExports.setOutput('deleted_files', results.success.deleted);
+                    coreExports.setOutput('failed_operations', results.failed.modified + results.failed.deleted);
+                    return [3 /*break*/, 19];
+                case 18:
+                    error_7 = _c.sent();
+                    coreExports.setFailed("Failed to apply changes: ".concat(error_7));
+                    throw error_7;
+                case 19: return [2 /*return*/];
+            }
+        });
+    });
+}
 function createPullRequest(branchName) {
     return __awaiter(this, void 0, void 0, function () {
         var token, baseBranch, octokit, _a, owner, repo, pullRequest, error_8;
@@ -112849,7 +112986,7 @@ function createPullRequest(branchName) {
 
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var directory, authKey, flags, filesToModify, impactedFiles, response, branchName, exec;
+        var directory, authKey, flags, filesToModify, impactedFiles, response;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -112871,17 +113008,12 @@ function run() {
                     return [4 /*yield*/, removeFlagsFromFiles(__spreadArray(__spreadArray([], filesToModify, true), impactedFiles, true), flags, authKey)];
                 case 4:
                     response = _a.sent();
+                    if (response.status === 'error') {
+                        coreExports.setFailed(response.message);
+                        return [2 /*return*/];
+                    }
                     return [4 /*yield*/, applyChanges(response)];
                 case 5:
-                    _a.sent();
-                    branchName = "remove-feature-flags-".concat(Date.now());
-                    exec = require('child_process').execSync;
-                    exec("git checkout -b ".concat(branchName));
-                    exec("git add .");
-                    exec("git commit -m \"Remove stale feature flags\"");
-                    exec("git push origin ".concat(branchName));
-                    return [4 /*yield*/, createPullRequest(branchName)];
-                case 6:
                     _a.sent();
                     return [2 /*return*/];
             }

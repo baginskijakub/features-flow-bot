@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 
 import { getStaleFlags, removeFlagsFromFiles } from './services'
-import { applyChanges, findFilesWithFlags, findImpactedFiles } from './utils'
-import { createPullRequest } from './git'
+import { findFilesWithFlags, findImpactedFiles } from './utils'
+import { applyChanges, createPullRequest } from './git'
 
 export async function run() {
   const directory = core.getInput('directory');
@@ -19,14 +19,10 @@ export async function run() {
 
   const response = await removeFlagsFromFiles([...filesToModify, ...impactedFiles], flags, authKey);
 
+  if(response.status === 'error') {
+    core.setFailed(response.message);
+    return;
+  }
+
   await applyChanges(response);
-
-  const branchName = `remove-feature-flags-${Date.now()}`;
-  const exec = require('child_process').execSync;
-  exec(`git checkout -b ${branchName}`);
-  exec(`git add .`);
-  exec(`git commit -m "Remove stale feature flags"`);
-  exec(`git push origin ${branchName}`);
-
-  await createPullRequest(branchName);
 }
