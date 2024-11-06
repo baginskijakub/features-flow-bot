@@ -27348,7 +27348,7 @@ var getStaleFlags = function (authenticationKey) { return __awaiter(void 0, void
         switch (_a.label) {
             case 0: return [4 /*yield*/, fetch("".concat(API_URL, "/bot/stale"), {
                     method: 'POST',
-                    body: JSON.stringify({ authenticationKey: "YYX37ZKZhIY=.AoYEKL5NoOOaAdAyyHc0gQYNEcB7lmh9uiQINdRvvAU=.ZmVhdHVyZXMtZmxvdw==.MQ==" }),
+                    body: JSON.stringify({ authenticationKey: authenticationKey }),
                     headers: {
                         'Content-Type': 'application/json'
                     }
@@ -112551,14 +112551,16 @@ function findFilesWithFlags(directory, flags) {
     return __awaiter(this, void 0, void 0, function () {
         function searchDirectory(dir) {
             return __awaiter(this, void 0, void 0, function () {
-                var entries, _loop_1, _i, entries_1, entry;
+                var entries, _loop_1, _i, entries_1, entry, error_2;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, fs.readdir(dir, { withFileTypes: true })];
+                        case 0:
+                            _a.trys.push([0, 6, , 7]);
+                            return [4 /*yield*/, fs.readdir(dir, { withFileTypes: true })];
                         case 1:
                             entries = _a.sent();
                             _loop_1 = function (entry) {
-                                var fullPath, content_1;
+                                var fullPath, content_1, error_3;
                                 return __generator(this, function (_b) {
                                     switch (_b.label) {
                                         case 0:
@@ -112567,17 +112569,25 @@ function findFilesWithFlags(directory, flags) {
                                             return [4 /*yield*/, searchDirectory(fullPath)];
                                         case 1:
                                             _b.sent();
-                                            return [3 /*break*/, 4];
+                                            return [3 /*break*/, 6];
                                         case 2:
-                                            if (!(entry.isFile() && /\.(js|ts|jsx|tsx)$/.test(entry.name))) return [3 /*break*/, 4];
-                                            return [4 /*yield*/, fs.readFile(fullPath, 'utf8')];
+                                            if (!(entry.isFile() && /\.(js|ts|jsx|tsx)$/.test(entry.name))) return [3 /*break*/, 6];
+                                            _b.label = 3;
                                         case 3:
+                                            _b.trys.push([3, 5, , 6]);
+                                            return [4 /*yield*/, fs.readFile(fullPath, 'utf8')];
+                                        case 4:
                                             content_1 = _b.sent();
                                             if (flags.some(function (flag) { return content_1.includes(flag); })) {
                                                 filesToModify.push({ path: fullPath, content: content_1 });
+                                                coreExports.debug("Found flag in file: ".concat(fullPath));
                                             }
-                                            _b.label = 4;
-                                        case 4: return [2 /*return*/];
+                                            return [3 /*break*/, 6];
+                                        case 5:
+                                            error_3 = _b.sent();
+                                            coreExports.warning("Error reading file ".concat(fullPath, ": ").concat(error_3));
+                                            return [3 /*break*/, 6];
+                                        case 6: return [2 /*return*/];
                                     }
                                 });
                             };
@@ -112593,19 +112603,40 @@ function findFilesWithFlags(directory, flags) {
                         case 4:
                             _i++;
                             return [3 /*break*/, 2];
-                        case 5: return [2 /*return*/];
+                        case 5: return [3 /*break*/, 7];
+                        case 6:
+                            error_2 = _a.sent();
+                            coreExports.error("Error processing directory ".concat(dir, ": ").concat(error_2));
+                            throw error_2;
+                        case 7: return [2 /*return*/];
                     }
                 });
             });
         }
-        var filesToModify;
+        var filesToModify, normalizedDir, dirStats, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     filesToModify = [];
-                    return [4 /*yield*/, searchDirectory(directory)];
+                    normalizedDir = path.resolve(process.cwd(), directory);
+                    _a.label = 1;
                 case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, fs.stat(normalizedDir)];
+                case 2:
+                    dirStats = _a.sent();
+                    if (!dirStats.isDirectory()) {
+                        throw new Error("Path ".concat(normalizedDir, " is not a directory"));
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _a.sent();
+                    coreExports.error("Error accessing directory ".concat(normalizedDir, ": ").concat(error_1));
+                    throw error_1;
+                case 4: return [4 /*yield*/, searchDirectory(normalizedDir)];
+                case 5:
                     _a.sent();
+                    coreExports.info("Found ".concat(filesToModify.length, " files containing flags"));
                     return [2 /*return*/, filesToModify];
             }
         });
@@ -112613,62 +112644,109 @@ function findFilesWithFlags(directory, flags) {
 }
 function findImpactedFiles(filesToModify) {
     return __awaiter(this, void 0, void 0, function () {
-        var impactedFiles, _i, filesToModify_1, file, content, importMatches, _a, importMatches_1, match, importPath, fullPath, isFileImpacted, _b, _c;
-        var _d;
+        var impactedFiles, processedPaths, _i, filesToModify_1, file, content, importMatches, _a, importMatches_1, match, importPath, fullPath, extensions, resolvedPath, _b, extensions_1, ext, pathWithExt, _c, _d, error_4, error_5;
         var _e;
-        return __generator(this, function (_f) {
-            switch (_f.label) {
+        var _f;
+        return __generator(this, function (_g) {
+            switch (_g.label) {
                 case 0:
                     impactedFiles = [];
+                    processedPaths = new Set();
                     _i = 0, filesToModify_1 = filesToModify;
-                    _f.label = 1;
+                    _g.label = 1;
                 case 1:
-                    if (!(_i < filesToModify_1.length)) return [3 /*break*/, 8];
+                    if (!(_i < filesToModify_1.length)) return [3 /*break*/, 17];
                     file = filesToModify_1[_i];
-                    return [4 /*yield*/, fs.readFile(file.path, 'utf8')];
+                    _g.label = 2;
                 case 2:
-                    content = _f.sent();
+                    _g.trys.push([2, 15, , 16]);
+                    return [4 /*yield*/, fs.readFile(file.path, 'utf8')];
+                case 3:
+                    content = _g.sent();
                     importMatches = content.match(/import .* from ['"](.+)['"]/g) || [];
                     _a = 0, importMatches_1 = importMatches;
-                    _f.label = 3;
-                case 3:
-                    if (!(_a < importMatches_1.length)) return [3 /*break*/, 7];
-                    match = importMatches_1[_a];
-                    importPath = (_e = match.match(/['"](.+)['"]/)) === null || _e === void 0 ? void 0 : _e[1];
-                    if (!importPath) return [3 /*break*/, 6];
-                    fullPath = path.resolve(path.dirname(file.path), importPath);
-                    return [4 /*yield*/, fs.stat(fullPath).then(function () { return true; }).catch(function () { return false; })];
+                    _g.label = 4;
                 case 4:
-                    isFileImpacted = _f.sent();
-                    if (!isFileImpacted) return [3 /*break*/, 6];
-                    _c = (_b = impactedFiles).push;
-                    _d = { path: fullPath };
-                    return [4 /*yield*/, fs.readFile(fullPath, 'utf8')];
+                    if (!(_a < importMatches_1.length)) return [3 /*break*/, 14];
+                    match = importMatches_1[_a];
+                    importPath = (_f = match.match(/['"](.+)['"]/)) === null || _f === void 0 ? void 0 : _f[1];
+                    if (!importPath) return [3 /*break*/, 13];
+                    _g.label = 5;
                 case 5:
-                    _c.apply(_b, [(_d.content = _f.sent(), _d)]);
-                    _f.label = 6;
+                    _g.trys.push([5, 12, , 13]);
+                    fullPath = importPath;
+                    if (!path.isAbsolute(importPath)) {
+                        fullPath = path.resolve(path.dirname(file.path), importPath);
+                    }
+                    extensions = ['.js', '.ts', '.jsx', '.tsx'];
+                    resolvedPath = '';
+                    _b = 0, extensions_1 = extensions;
+                    _g.label = 6;
                 case 6:
-                    _a++;
-                    return [3 /*break*/, 3];
+                    if (!(_b < extensions_1.length)) return [3 /*break*/, 9];
+                    ext = extensions_1[_b];
+                    pathWithExt = fullPath + ext;
+                    return [4 /*yield*/, fs.stat(pathWithExt).then(function () { return true; }).catch(function () { return false; })];
                 case 7:
+                    if (_g.sent()) {
+                        resolvedPath = pathWithExt;
+                        return [3 /*break*/, 9];
+                    }
+                    _g.label = 8;
+                case 8:
+                    _b++;
+                    return [3 /*break*/, 6];
+                case 9:
+                    if (!(resolvedPath && !processedPaths.has(resolvedPath))) return [3 /*break*/, 11];
+                    processedPaths.add(resolvedPath);
+                    _d = (_c = impactedFiles).push;
+                    _e = {
+                        path: resolvedPath
+                    };
+                    return [4 /*yield*/, fs.readFile(resolvedPath, 'utf8')];
+                case 10:
+                    _d.apply(_c, [(_e.content = _g.sent(),
+                            _e)]);
+                    coreExports.debug("Found impacted file: ".concat(resolvedPath));
+                    _g.label = 11;
+                case 11: return [3 /*break*/, 13];
+                case 12:
+                    error_4 = _g.sent();
+                    coreExports.debug("Could not resolve import ".concat(importPath, " in ").concat(file.path, ": ").concat(error_4));
+                    return [3 /*break*/, 13];
+                case 13:
+                    _a++;
+                    return [3 /*break*/, 4];
+                case 14: return [3 /*break*/, 16];
+                case 15:
+                    error_5 = _g.sent();
+                    coreExports.warning("Error processing imports in ".concat(file.path, ": ").concat(error_5));
+                    return [3 /*break*/, 16];
+                case 16:
                     _i++;
                     return [3 /*break*/, 1];
-                case 8: return [2 /*return*/, impactedFiles];
+                case 17:
+                    coreExports.info("Found ".concat(impactedFiles.length, " impacted files"));
+                    return [2 /*return*/, impactedFiles];
             }
         });
     });
 }
 function applyChanges(response) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, modifiedFiles, filesToDelete, _i, modifiedFiles_1, file, error_1, _b, filesToDelete_1, filePath, error_2;
+        var _a, modifiedFiles, filesToDelete, results, _i, modifiedFiles_1, file, error_6, _b, filesToDelete_1, filePath, error_7;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
                     if (response.status === 'error') {
-                        console.error(response.message);
+                        coreExports.setFailed(response.message);
                         return [2 /*return*/];
                     }
                     _a = response.data, modifiedFiles = _a.modifiedFiles, filesToDelete = _a.filesToDelete;
+                    results = {
+                        success: { modified: 0, deleted: 0 },
+                        failed: { modified: 0, deleted: 0 }
+                    };
                     _i = 0, modifiedFiles_1 = modifiedFiles;
                     _c.label = 1;
                 case 1:
@@ -112680,11 +112758,13 @@ function applyChanges(response) {
                     return [4 /*yield*/, fs.writeFile(file.path, file.content, 'utf8')];
                 case 3:
                     _c.sent();
-                    console.log("Updated file: ".concat(file.path));
+                    coreExports.info("Updated file: ".concat(file.path));
+                    results.success.modified++;
                     return [3 /*break*/, 5];
                 case 4:
-                    error_1 = _c.sent();
-                    console.error("Error writing to file ".concat(file.path, ":"), error_1);
+                    error_6 = _c.sent();
+                    coreExports.error("Error writing to file ".concat(file.path, ": ").concat(error_6));
+                    results.failed.modified++;
                     return [3 /*break*/, 5];
                 case 5:
                     _i++;
@@ -112701,27 +112781,34 @@ function applyChanges(response) {
                     return [4 /*yield*/, fs.unlink(filePath)];
                 case 9:
                     _c.sent();
-                    console.log("Deleted file: ".concat(filePath));
+                    coreExports.info("Deleted file: ".concat(filePath));
+                    results.success.deleted++;
                     return [3 /*break*/, 11];
                 case 10:
-                    error_2 = _c.sent();
-                    console.error("Error deleting file ".concat(filePath, ":"), error_2);
+                    error_7 = _c.sent();
+                    coreExports.error("Error deleting file ".concat(filePath, ": ").concat(error_7));
+                    results.failed.deleted++;
                     return [3 /*break*/, 11];
                 case 11:
                     _b++;
                     return [3 /*break*/, 7];
-                case 12: return [2 /*return*/];
+                case 12:
+                    // Set output for GitHub Actions
+                    coreExports.setOutput('modified_files', results.success.modified);
+                    coreExports.setOutput('deleted_files', results.success.deleted);
+                    coreExports.setOutput('failed_operations', results.failed.modified + results.failed.deleted);
+                    return [2 /*return*/];
             }
         });
     });
 }
 function createPullRequest(branchName) {
     return __awaiter(this, void 0, void 0, function () {
-        var token, baseBranch, octokit, _a, owner, repo, pullRequest, error_3;
+        var token, baseBranch, octokit, _a, owner, repo, pullRequest, error_8;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    token = coreExports.getInput('GITHUB_TOKEN', { required: true });
+                    token = coreExports.getInput('github_token', { required: true });
                     baseBranch = coreExports.getInput('base_branch', { required: false }) || 'main';
                     octokit = githubExports.getOctokit(token);
                     _a = githubExports.context.repo, owner = _a.owner, repo = _a.repo;
@@ -112734,16 +112821,28 @@ function createPullRequest(branchName) {
                             head: branchName,
                             base: baseBranch,
                             title: 'Remove Stale Feature Flags',
-                            body: 'This PR removes stale feature flags and associated code. This is an automated PR created by the FeaturesFlow.',
+                            body: [
+                                '## Feature Flag Cleanup',
+                                '',
+                                'This PR removes stale feature flags and associated code. This is an automated PR created by the FeaturesFlow.',
+                                '',
+                                '### Changes Made:',
+                                '- Removed unused feature flags',
+                                '- Cleaned up associated code',
+                                '- Updated impacted files',
+                                '',
+                                'Please review the changes carefully before merging.',
+                            ].join('\n'),
                         })];
                 case 2:
                     pullRequest = (_b.sent()).data;
-                    console.log("Pull request created: ".concat(pullRequest.html_url));
+                    coreExports.info("Pull request created: ".concat(pullRequest.html_url));
+                    coreExports.setOutput('pull_request_url', pullRequest.html_url);
                     return [3 /*break*/, 4];
                 case 3:
-                    error_3 = _b.sent();
-                    console.error('Failed to create pull request:', error_3);
-                    throw error_3;
+                    error_8 = _b.sent();
+                    coreExports.error('Failed to create pull request:', error_8);
+                    throw error_8;
                 case 4: return [2 /*return*/];
             }
         });
@@ -112758,7 +112857,7 @@ function run() {
                 case 0:
                     directory = coreExports.getInput('directory');
                     authKey = coreExports.getInput('auth_key');
-                    return [4 /*yield*/, getStaleFlags()];
+                    return [4 /*yield*/, getStaleFlags(authKey)];
                 case 1:
                     flags = _a.sent();
                     if (flags.length === 0) {
