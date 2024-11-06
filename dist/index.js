@@ -27341,9 +27341,9 @@ function requireCore () {
 
 var coreExports = requireCore();
 
-var API_URL = 'https://sdk.featuresflow.com/v1/';
+var API_URL = 'https://sdk.featuresflow.com/v1';
 var getStaleFlags = function (authenticationKey) { return __awaiter(void 0, void 0, void 0, function () {
-    var res;
+    var res, x;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, fetch("".concat(API_URL, "/bot/stale"), {
@@ -27352,11 +27352,16 @@ var getStaleFlags = function (authenticationKey) { return __awaiter(void 0, void
                 })];
             case 1:
                 res = _a.sent();
+                console.log(res);
+                return [4 /*yield*/, res.json()];
+            case 2:
+                x = _a.sent();
+                console.log(x);
                 if (!res.ok) {
                     return [2 /*return*/, []];
                 }
                 return [4 /*yield*/, res.json().then(function (data) { return data.flags; })];
-            case 2: return [2 /*return*/, _a.sent()];
+            case 3: return [2 /*return*/, _a.sent()];
         }
     });
 }); };

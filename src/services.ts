@@ -10,6 +10,11 @@ export const getStaleFlags = async (authenticationKey: string): Promise<string[]
       body: JSON.stringify({authenticationKey})
     })
 
+  console.log(res)
+
+  const x = await res.json()
+
+  console.log(x)
 
   if(!res.ok) {
     return []
