@@ -13,6 +13,10 @@ inputs:
     description: 'Authentication Key'
     required: true
     secret: true
+  github_token:
+    description: 'GitHub token'
+    required: true
+    secret: true
   base_branch:
     description: 'Base branch to compare against'
     required: false
@@ -35,7 +39,7 @@ runs:
 
     - name: 'Run TypeScript Action'
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       run: npx ts-node src/index.ts
       shell: bash
 
