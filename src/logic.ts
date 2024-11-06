@@ -1,12 +1,12 @@
 import * as core from '@actions/core'
 
 import { getStaleFlags, removeFlagsFromFiles } from './services'
-import { findFilesWithFlags, findImpactedFiles } from './utils'
-import { applyChanges, createPullRequest } from './git'
+import { findFilesWithFlags } from './utils'
+import { applyChanges } from './git'
 
 export async function run() {
   const directory = core.getInput('directory');
-  const authKey = core.getInput('auth_key');
+  const authKey = core.getInput('auth_key')
   const flags = await getStaleFlags(authKey);
 
   if (flags.length === 0) {
@@ -15,9 +15,8 @@ export async function run() {
   }
 
   const filesToModify = await findFilesWithFlags(directory, flags);
-  const impactedFiles = await findImpactedFiles(filesToModify);
 
-  const response = await removeFlagsFromFiles([...filesToModify, ...impactedFiles], flags, authKey);
+  const response = await removeFlagsFromFiles(filesToModify, flags, authKey);
 
   if(response.status === 'error') {
     core.setFailed(response.message);
