@@ -5,14 +5,14 @@ icon: 'terminal'
 color: 'gray-dark'
 
 inputs:
-  directory:
-    description: 'Directory to search for files'
-    required: true
-    default: './src'
   auth_key:
     description: 'Authentication Key'
     required: true
     secret: true
+  directory:
+    description: 'Directory to search for files'
+    required: true
+    default: './src'
   github_token:
     description: 'GitHub token'
     required: true

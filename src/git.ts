@@ -8,21 +8,17 @@ async function configureGit() {
   try {
     await exec('git', [
       'config',
-      '--global',
       'user.name',
       'github-actions[bot]'
     ]);
 
     await exec('git', [
       'config',
-      '--global',
       'user.email',
-      '41898282+github-actions[bot]@users.noreply.github.com'
+      'github-actions[bot]@users.noreply.github.com'
     ]);
-
-    core.debug('Git user configured successfully');
   } catch (error) {
-    core.error('Failed to configure git user');
+    core.error(`Failed to configure git user: ${error}`);
     throw error;
   }
 }
@@ -40,7 +36,7 @@ async function commitChanges(message: string): Promise<void> {
 
     core.debug('Changes committed successfully');
   } catch (error) {
-    core.error('Failed to commit changes');
+    core.error(`Failed to commit changes: ${error}`);
     throw error;
   }
 }
