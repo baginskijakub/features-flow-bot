@@ -145,38 +145,3 @@ export async function applyChanges(response: TResponse): Promise<void> {
   core.setOutput('deleted_files', results.success.deleted);
   core.setOutput('failed_operations', results.failed.modified + results.failed.deleted);
 }
-
-export async function createPullRequest(branchName: string) {
-  const token = core.getInput('github_token', { required: true });
-  const baseBranch = core.getInput('base_branch', { required: false }) || 'main';
-  const octokit = github.getOctokit(token);
-  const { owner, repo } = github.context.repo;
-
-  try {
-    const { data: pullRequest } = await octokit.rest.pulls.create({
-      owner,
-      repo,
-      head: branchName,
-      base: baseBranch,
-      title: 'Remove Stale Feature Flags',
-      body: [
-        '## Feature Flag Cleanup',
-        '',
-        'This PR removes stale feature flags and associated code. This is an automated PR created by the FeaturesFlow.',
-        '',
-        '### Changes Made:',
-        '- Removed unused feature flags',
-        '- Cleaned up associated code',
-        '- Updated impacted files',
-        '',
-        'Please review the changes carefully before merging.',
-      ].join('\n'),
-    });
-
-    core.info(`Pull request created: ${pullRequest.html_url}`);
-    core.setOutput('pull_request_url', pullRequest.html_url);
-  } catch (error) {
-    core.error('Failed to create pull request:', error);
-    throw error;
-  }
-}

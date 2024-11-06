@@ -1,7 +1,8 @@
 import * as core from '@actions/core'
 
 import { getStaleFlags, removeFlagsFromFiles } from './services'
-import { applyChanges, createPullRequest, findFilesWithFlags, findImpactedFiles } from './utils'
+import { applyChanges, findFilesWithFlags, findImpactedFiles } from './utils'
+import { createPullRequest } from './git'
 
 export async function run() {
   const directory = core.getInput('directory');
