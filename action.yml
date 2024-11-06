@@ -24,6 +24,7 @@ inputs:
 
 runs:
   using: 'node16'
+  main: dist/index.js
   steps:
     - name: 'Checkout repository'
       uses: actions/checkout@v3
@@ -34,13 +35,9 @@ runs:
         node-version: '16'
 
     - name: 'Install dependencies'
-      run: npm install
-      shell: bash
-
-    - name: 'Run TypeScript Action'
-      env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-      run: npx ts-node src/index.ts
+      run: |
+        npm install
+        npm run build  # Assumes you have a "build" script in package.json that compiles TypeScript
       shell: bash
 
 permissions:

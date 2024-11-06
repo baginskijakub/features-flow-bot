@@ -16,7 +16,7 @@ export async function run() {
   const filesToModify = await findFilesWithFlags(directory, flags);
   const impactedFiles = await findImpactedFiles(filesToModify);
 
-  const response = await removeFlagsFromFiles([...filesToModify, ...impactedFiles], flags);
+  const response = await removeFlagsFromFiles([...filesToModify, ...impactedFiles], flags, authKey);
 
   await applyChanges(response);
 
