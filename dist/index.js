@@ -27343,12 +27343,38 @@ var coreExports = requireCore();
 
 var API_URL = 'https://sdk.featuresflow.com/v1';
 var getStaleFlags = function (authenticationKey) { return __awaiter(void 0, void 0, void 0, function () {
-    var res, x;
+    var res, data;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, fetch("".concat(API_URL, "/bot/stale"), {
                     method: 'POST',
-                    body: JSON.stringify({ authenticationKey: authenticationKey })
+                    body: JSON.stringify({ authenticationKey: "YYX37ZKZhIY=.AoYEKL5NoOOaAdAyyHc0gQYNEcB7lmh9uiQINdRvvAU=.ZmVhdHVyZXMtZmxvdw==.MQ==" }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })];
+            case 1:
+                res = _a.sent();
+                if (!res.ok) {
+                    return [2 /*return*/, []];
+                }
+                return [4 /*yield*/, res.json()];
+            case 2:
+                data = _a.sent();
+                return [2 /*return*/, data.features];
+        }
+    });
+}); };
+var removeFlagsFromFiles = function (files, flags, authenticationKey) { return __awaiter(void 0, void 0, void 0, function () {
+    var res, x, data;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, fetch("".concat(API_URL, "/bot/remove"), {
+                    method: 'POST',
+                    body: JSON.stringify({ files: files, flags: flags, authenticationKey: authenticationKey }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 })];
             case 1:
                 res = _a.sent();
@@ -27358,31 +27384,13 @@ var getStaleFlags = function (authenticationKey) { return __awaiter(void 0, void
                 x = _a.sent();
                 console.log(x);
                 if (!res.ok) {
-                    return [2 /*return*/, []];
-                }
-                return [4 /*yield*/, res.json().then(function (data) { return data.flags; })];
-            case 3: return [2 /*return*/, _a.sent()];
-        }
-    });
-}); };
-var removeFlagsFromFiles = function (files, flags, authenticationKey) { return __awaiter(void 0, void 0, void 0, function () {
-    var res, data;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, fetch("".concat(API_URL, "/bot/remove"), {
-                    method: 'POST',
-                    body: JSON.stringify({ files: files, flags: flags, authenticationKey: authenticationKey })
-                })];
-            case 1:
-                res = _a.sent();
-                if (!res.ok) {
                     return [2 /*return*/, {
                             status: 'error',
                             message: 'Failed to remove flags from files'
                         }];
                 }
                 return [4 /*yield*/, res.json()];
-            case 2:
+            case 3:
                 data = _a.sent();
                 return [2 /*return*/, {
                         status: 'success',
@@ -112750,7 +112758,7 @@ function run() {
                 case 0:
                     directory = coreExports.getInput('directory');
                     authKey = coreExports.getInput('auth_key');
-                    return [4 /*yield*/, getStaleFlags(authKey)];
+                    return [4 /*yield*/, getStaleFlags()];
                 case 1:
                     flags = _a.sent();
                     if (flags.length === 0) {
