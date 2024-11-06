@@ -1,6 +1,6 @@
 import { TFile, TResponse } from './types'
 
-const API_URL = 'https://sdk.featuresflow.com/v1/'
+const API_URL = 'https://sdk.featuresflow.com/v1'
 
 export const getStaleFlags = async (authenticationKey: string): Promise<string[]> => {
   const res = await fetch(
