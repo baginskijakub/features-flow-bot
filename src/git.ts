@@ -25,13 +25,10 @@ async function configureGit() {
 
 async function commitChanges(message: string): Promise<void> {
   try {
-    // Configure git user first
     await configureGit();
 
-    // Stage all changes
     await exec('git', ['add', '.']);
 
-    // Create commit
     await exec('git', ['commit', '-m', message]);
 
     core.debug('Changes committed successfully');
@@ -43,7 +40,6 @@ async function commitChanges(message: string): Promise<void> {
 
 async function createBranch(branchName: string): Promise<void> {
   try {
-    // Create and checkout new branch
     await exec('git', ['checkout', '-b', branchName]);
     core.debug(`Created and checked out branch: ${branchName}`);
   } catch (error) {
@@ -74,15 +70,12 @@ export async function applyChanges(response: TResponse): Promise<void> {
     failed: { modified: 0, deleted: 0 }
   };
 
-  // Generate a unique branch name
   const timestamp = new Date().getTime();
-  const branchName = `feature-flag-cleanup-${timestamp}`;
+  const branchName = `featuresflow/cleanup-${timestamp}`;
 
   try {
-    // Create new branch
     await createBranch(branchName);
 
-    // Apply file modifications
     for (const file of modifiedFiles) {
       try {
         await fs.writeFile(file.path, file.content, 'utf8');
@@ -94,7 +87,6 @@ export async function applyChanges(response: TResponse): Promise<void> {
       }
     }
 
-    // Apply file deletions
     for (const filePath of filesToDelete) {
       try {
         await fs.unlink(filePath);
@@ -106,14 +98,11 @@ export async function applyChanges(response: TResponse): Promise<void> {
       }
     }
 
-    // Commit and push changes
     await commitChanges('Remove stale feature flags');
     await pushChanges(branchName);
 
-    // Create pull request
     await createPullRequest(branchName);
 
-    // Set outputs
     core.setOutput('branch_name', branchName);
     core.setOutput('modified_files', results.success.modified);
     core.setOutput('deleted_files', results.success.deleted);

@@ -1,17 +1,14 @@
-import { TFile, TResponse } from './types'
+import { TFile } from './types'
 import fs from 'fs/promises'
 import path from 'path'
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 
 export async function findFilesWithFlags(directory: string, flags: string[]): Promise<TFile[]> {
   const filesToModify: TFile[] = [];
 
-  // Normalize and validate the directory path
   const normalizedDir = path.resolve(process.cwd(), directory);
 
   try {
-    // Check if directory exists
     const dirStats = await fs.stat(normalizedDir);
     if (!dirStats.isDirectory()) {
       throw new Error(`Path ${normalizedDir} is not a directory`);
@@ -51,57 +48,4 @@ export async function findFilesWithFlags(directory: string, flags: string[]): Pr
   await searchDirectory(normalizedDir);
   core.info(`Found ${filesToModify.length} files containing flags`);
   return filesToModify;
-}
-
-export async function findImpactedFiles(filesToModify: TFile[]): Promise<TFile[]> {
-  const impactedFiles: TFile[] = [];
-  const processedPaths = new Set<string>(); // Prevent duplicate processing
-
-  for (const file of filesToModify) {
-    try {
-      const content = await fs.readFile(file.path, 'utf8');
-      const importMatches = content.match(/import .* from ['"](.+)['"]/g) || [];
-
-      for (const match of importMatches) {
-        const importPath = match.match(/['"](.+)['"]/)?.[1];
-        if (importPath) {
-          try {
-            // Handle different import path formats
-            let fullPath = importPath;
-            if (!path.isAbsolute(importPath)) {
-              fullPath = path.resolve(path.dirname(file.path), importPath);
-            }
-
-            // Add file extensions if needed
-            const extensions = ['.js', '.ts', '.jsx', '.tsx'];
-            let resolvedPath = '';
-
-            for (const ext of extensions) {
-              const pathWithExt = fullPath + ext;
-              if (await fs.stat(pathWithExt).then(() => true).catch(() => false)) {
-                resolvedPath = pathWithExt;
-                break;
-              }
-            }
-
-            if (resolvedPath && !processedPaths.has(resolvedPath)) {
-              processedPaths.add(resolvedPath);
-              impactedFiles.push({
-                path: resolvedPath,
-                content: await fs.readFile(resolvedPath, 'utf8')
-              });
-              core.debug(`Found impacted file: ${resolvedPath}`);
-            }
-          } catch (error) {
-            core.debug(`Could not resolve import ${importPath} in ${file.path}: ${error}`);
-          }
-        }
-      }
-    } catch (error) {
-      core.warning(`Error processing imports in ${file.path}: ${error}`);
-    }
-  }
-
-  core.info(`Found ${impactedFiles.length} impacted files`);
-  return impactedFiles;
 }

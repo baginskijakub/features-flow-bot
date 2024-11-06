@@ -3,7 +3,7 @@
 var require$$0 = require('os');
 var require$$0$1 = require('crypto');
 var require$$1$1 = require('fs');
-var path = require('path');
+var require$$1$5 = require('path');
 var require$$2$1 = require('http');
 var require$$3$1 = require('https');
 var require$$0$4 = require('net');
@@ -25591,7 +25591,7 @@ function requirePathUtils () {
 	};
 	Object.defineProperty(pathUtils, "__esModule", { value: true });
 	pathUtils.toPlatformPath = pathUtils.toWin32Path = pathUtils.toPosixPath = void 0;
-	const path$1 = __importStar(path);
+	const path = __importStar(require$$1$5);
 	/**
 	 * toPosixPath converts the given path to the posix form. On Windows, \\ will be
 	 * replaced with /.
@@ -25623,7 +25623,7 @@ function requirePathUtils () {
 	 * @return string The platform-specific path.
 	 */
 	function toPlatformPath(pth) {
-	    return pth.replace(/[/\\]/g, path$1.sep);
+	    return pth.replace(/[/\\]/g, path.sep);
 	}
 	pathUtils.toPlatformPath = toPlatformPath;
 	
@@ -25678,7 +25678,7 @@ function requireIoUtil () {
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.getCmdPath = exports.tryGetExecutablePath = exports.isRooted = exports.isDirectory = exports.exists = exports.READONLY = exports.UV_FS_O_EXLOCK = exports.IS_WINDOWS = exports.unlink = exports.symlink = exports.stat = exports.rmdir = exports.rm = exports.rename = exports.readlink = exports.readdir = exports.open = exports.mkdir = exports.lstat = exports.copyFile = exports.chmod = void 0;
 		const fs = __importStar(require$$1$1);
-		const path$1 = __importStar(path);
+		const path = __importStar(require$$1$5);
 		_a = fs.promises
 		// export const {open} = 'fs'
 		, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.open = _a.open, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rm = _a.rm, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
@@ -25747,7 +25747,7 @@ function requireIoUtil () {
 		        if (stats && stats.isFile()) {
 		            if (exports.IS_WINDOWS) {
 		                // on Windows, test for valid extension
-		                const upperExt = path$1.extname(filePath).toUpperCase();
+		                const upperExt = path.extname(filePath).toUpperCase();
 		                if (extensions.some(validExt => validExt.toUpperCase() === upperExt)) {
 		                    return filePath;
 		                }
@@ -25776,11 +25776,11 @@ function requireIoUtil () {
 		                if (exports.IS_WINDOWS) {
 		                    // preserve the case of the actual file (since an extension was appended)
 		                    try {
-		                        const directory = path$1.dirname(filePath);
-		                        const upperName = path$1.basename(filePath).toUpperCase();
+		                        const directory = path.dirname(filePath);
+		                        const upperName = path.basename(filePath).toUpperCase();
 		                        for (const actualName of yield exports.readdir(directory)) {
 		                            if (upperName === actualName.toUpperCase()) {
-		                                filePath = path$1.join(directory, actualName);
+		                                filePath = path.join(directory, actualName);
 		                                break;
 		                            }
 		                        }
@@ -25868,7 +25868,7 @@ function requireIo () {
 	Object.defineProperty(io, "__esModule", { value: true });
 	io.findInPath = io.which = io.mkdirP = io.rmRF = io.mv = io.cp = void 0;
 	const assert_1 = require$$0$3;
-	const path$1 = __importStar(path);
+	const path = __importStar(require$$1$5);
 	const ioUtil = __importStar(requireIoUtil());
 	/**
 	 * Copies a file or folder.
@@ -25888,7 +25888,7 @@ function requireIo () {
 	        }
 	        // If dest is an existing directory, should copy inside.
 	        const newDest = destStat && destStat.isDirectory() && copySourceDirectory
-	            ? path$1.join(dest, path$1.basename(source))
+	            ? path.join(dest, path.basename(source))
 	            : dest;
 	        if (!(yield ioUtil.exists(source))) {
 	            throw new Error(`no such file or directory: ${source}`);
@@ -25903,7 +25903,7 @@ function requireIo () {
 	            }
 	        }
 	        else {
-	            if (path$1.relative(source, newDest) === '') {
+	            if (path.relative(source, newDest) === '') {
 	                // a file cannot be copied to itself
 	                throw new Error(`'${newDest}' and '${source}' are the same file`);
 	            }
@@ -25925,7 +25925,7 @@ function requireIo () {
 	            let destExists = true;
 	            if (yield ioUtil.isDirectory(dest)) {
 	                // If dest is directory copy src into dest
-	                dest = path$1.join(dest, path$1.basename(source));
+	                dest = path.join(dest, path.basename(source));
 	                destExists = yield ioUtil.exists(dest);
 	            }
 	            if (destExists) {
@@ -25937,7 +25937,7 @@ function requireIo () {
 	                }
 	            }
 	        }
-	        yield mkdirP(path$1.dirname(dest));
+	        yield mkdirP(path.dirname(dest));
 	        yield ioUtil.rename(source, dest);
 	    });
 	}
@@ -26032,7 +26032,7 @@ function requireIo () {
 	        // build the list of extensions to try
 	        const extensions = [];
 	        if (ioUtil.IS_WINDOWS && process.env['PATHEXT']) {
-	            for (const extension of process.env['PATHEXT'].split(path$1.delimiter)) {
+	            for (const extension of process.env['PATHEXT'].split(path.delimiter)) {
 	                if (extension) {
 	                    extensions.push(extension);
 	                }
@@ -26047,7 +26047,7 @@ function requireIo () {
 	            return [];
 	        }
 	        // if any path separators, return empty
-	        if (tool.includes(path$1.sep)) {
+	        if (tool.includes(path.sep)) {
 	            return [];
 	        }
 	        // build the list of directories
@@ -26058,7 +26058,7 @@ function requireIo () {
 	        // across platforms.
 	        const directories = [];
 	        if (process.env.PATH) {
-	            for (const p of process.env.PATH.split(path$1.delimiter)) {
+	            for (const p of process.env.PATH.split(path.delimiter)) {
 	                if (p) {
 	                    directories.push(p);
 	                }
@@ -26067,7 +26067,7 @@ function requireIo () {
 	        // find all matches
 	        const matches = [];
 	        for (const directory of directories) {
-	            const filePath = yield ioUtil.tryGetExecutablePath(path$1.join(directory, tool), extensions);
+	            const filePath = yield ioUtil.tryGetExecutablePath(path.join(directory, tool), extensions);
 	            if (filePath) {
 	                matches.push(filePath);
 	            }
@@ -26176,7 +26176,7 @@ function requireToolrunner () {
 	const os = __importStar(require$$0);
 	const events = __importStar(require$$4$1);
 	const child = __importStar(require$$2$3);
-	const path$1 = __importStar(path);
+	const path = __importStar(require$$1$5);
 	const io = __importStar(requireIo());
 	const ioUtil = __importStar(requireIoUtil());
 	const timers_1 = require$$6$1;
@@ -26531,7 +26531,7 @@ function requireToolrunner () {
 	                (this.toolPath.includes('/') ||
 	                    (IS_WINDOWS && this.toolPath.includes('\\')))) {
 	                // prefer options.cwd if it is specified, however options.cwd may also need to be rooted
-	                this.toolPath = path$1.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+	                this.toolPath = path.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
 	            }
 	            // if the tool is only a file name, then resolve it from the PATH
 	            // otherwise verify it exists (add extension on Windows if necessary)
@@ -27020,7 +27020,7 @@ function requireCore () {
 		const file_command_1 = requireFileCommand();
 		const utils_1 = requireUtils$4();
 		const os = __importStar(require$$0);
-		const path$1 = __importStar(path);
+		const path = __importStar(require$$1$5);
 		const oidc_utils_1 = requireOidcUtils();
 		/**
 		 * The code to exit an action
@@ -27075,7 +27075,7 @@ function requireCore () {
 		    else {
 		        (0, command_1.issueCommand)('add-path', {}, inputPath);
 		    }
-		    process.env['PATH'] = `${inputPath}${path$1.delimiter}${process.env['PATH']}`;
+		    process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
 		}
 		exports.addPath = addPath;
 		/**
@@ -27406,7 +27406,9 @@ var removeFlagsFromFiles = function (files, flags, authenticationKey) { return _
                 response = _a.sent();
                 if (response.status === 'success') {
                     allModifiedFiles = allModifiedFiles.concat(response.data.modifiedFiles);
-                    allFilesToRemove = allFilesToRemove.concat(response.data.filesToDelete);
+                    if (response.data.filesToDelete) {
+                        allFilesToRemove = allFilesToRemove.concat(response.data.filesToDelete);
+                    }
                 }
                 else {
                     return [2 /*return*/, {
@@ -27447,7 +27449,7 @@ function findFilesWithFlags(directory, flags) {
                                 return __generator(this, function (_b) {
                                     switch (_b.label) {
                                         case 0:
-                                            fullPath = path.join(dir, entry.name);
+                                            fullPath = require$$1$5.join(dir, entry.name);
                                             if (!entry.isDirectory()) return [3 /*break*/, 2];
                                             return [4 /*yield*/, searchDirectory(fullPath)];
                                         case 1:
@@ -27501,7 +27503,7 @@ function findFilesWithFlags(directory, flags) {
             switch (_a.label) {
                 case 0:
                     filesToModify = [];
-                    normalizedDir = path.resolve(process.cwd(), directory);
+                    normalizedDir = require$$1$5.resolve(process.cwd(), directory);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
@@ -112712,20 +112714,14 @@ function commitChanges(message) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 4, , 5]);
-                    // Configure git user first
                     return [4 /*yield*/, configureGit()];
                 case 1:
-                    // Configure git user first
                     _a.sent();
-                    // Stage all changes
                     return [4 /*yield*/, execExports.exec('git', ['add', '.'])];
                 case 2:
-                    // Stage all changes
                     _a.sent();
-                    // Create commit
                     return [4 /*yield*/, execExports.exec('git', ['commit', '-m', message])];
                 case 3:
-                    // Create commit
                     _a.sent();
                     coreExports.debug('Changes committed successfully');
                     return [3 /*break*/, 5];
@@ -112745,10 +112741,8 @@ function createBranch(branchName) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    // Create and checkout new branch
                     return [4 /*yield*/, execExports.exec('git', ['checkout', '-b', branchName])];
                 case 1:
-                    // Create and checkout new branch
                     _a.sent();
                     coreExports.debug("Created and checked out branch: ".concat(branchName));
                     return [3 /*break*/, 3];
@@ -112798,14 +112792,12 @@ function applyChanges(response) {
                         failed: { modified: 0, deleted: 0 }
                     };
                     timestamp = new Date().getTime();
-                    branchName = "feature-flag-cleanup-".concat(timestamp);
+                    branchName = "featuresflow/cleanup-".concat(timestamp);
                     _c.label = 1;
                 case 1:
                     _c.trys.push([1, 18, , 19]);
-                    // Create new branch
                     return [4 /*yield*/, createBranch(branchName)];
                 case 2:
-                    // Create new branch
                     _c.sent();
                     _i = 0, modifiedFiles_1 = modifiedFiles;
                     _c.label = 3;
@@ -112852,21 +112844,15 @@ function applyChanges(response) {
                 case 13:
                     _b++;
                     return [3 /*break*/, 9];
-                case 14: 
-                // Commit and push changes
-                return [4 /*yield*/, commitChanges('Remove stale feature flags')];
+                case 14: return [4 /*yield*/, commitChanges('Remove stale feature flags')];
                 case 15:
-                    // Commit and push changes
                     _c.sent();
                     return [4 /*yield*/, pushChanges(branchName)];
                 case 16:
                     _c.sent();
-                    // Create pull request
                     return [4 /*yield*/, createPullRequest(branchName)];
                 case 17:
-                    // Create pull request
                     _c.sent();
-                    // Set outputs
                     coreExports.setOutput('branch_name', branchName);
                     coreExports.setOutput('modified_files', results.success.modified);
                     coreExports.setOutput('deleted_files', results.success.deleted);

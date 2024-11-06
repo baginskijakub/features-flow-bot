@@ -64,7 +64,10 @@ export const removeFlagsFromFiles = async (files: TFile[], flags: string[], auth
 
     if (response.status === 'success') {
       allModifiedFiles = allModifiedFiles.concat(response.data.modifiedFiles);
-      allFilesToRemove = allFilesToRemove.concat(response.data.filesToDelete);
+
+      if(response.data.filesToDelete) {
+        allFilesToRemove = allFilesToRemove.concat(response.data.filesToDelete);
+      }
     } else {
       return {
         status: 'error',
